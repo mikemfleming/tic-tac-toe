@@ -1,32 +1,26 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
 ## Getting Started
-
-First, run the development server:
-
 ```bash
 npm run dev
 # or
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Requirements
+* Any front-end technology is fair game, but we use mainly React in our app. If in doubt, you can use create-react-app to get started super fast.
+* Share runnable code with us, either in: an online code sandbox like Glitch, or CodeSandbox, a git repository, or a zip file, if necessary
+* The game is to be played between two humans on the same machine.
+* Whomever clicks first will be "X". The next click will be "O", and so on.
+* The game follows standard tic-tac-toe rules:
+  * The game board is a 3x3 grid of squares.
+  * The game starts with one of the players and the game ends when one of the players has one whole row/ column/ diagonal filled with his/her respective character (‘O’ or ‘X’).
+  * If no one wins, then the game is said to be draw.
+* When a player wins or a draw is established, show the game status on screen with a "reset" button that clears the board and lets the players start again.
+* It doesn't need to be pretty, but if there's time to spare, keep reading ...
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+## Advanced challenges
+If you finish the initial challenge with time to spare, you can work on your choice of the following.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/import?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-# tic-tac-toe
-# tic-tac-toe
+* The players decide who will be represented by "X" and who by "O".
+* Use CSS and / or SVGs to make it a super-hot tic-tac-toe game.
+* Let the users pick grids in sizes other than 3x3.
+* Modify the code to allow playing against a computer.
