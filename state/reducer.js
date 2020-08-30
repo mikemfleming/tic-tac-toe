@@ -4,6 +4,8 @@ export const USER_MOVE = "user_move";
 export const RESET_GRID = "reset_grid";
 export const RESIZE_GRID = "resize_grid";
 export const PROCESS_BOARD = "process_board";
+export const TOGGLE_AI = 'toggle_ai'
+export const AI_MOVE = 'ai_move'
 
 export default () => useReducerWithLogger(reducer, initialState);
 
@@ -20,10 +22,21 @@ const initialState = {
   draw: false,
   maxSize: 13,
   minSize: 1,
+  ai: false
 };
 
 function reducer(state, action) {
   switch (action.type) {
+    case AI_MOVE:
+        return {
+            ...state,
+            currentUser: state.currentUser === "X" ? "0" : "X"
+        }
+    case TOGGLE_AI:
+        return {
+            ...state,
+            ai: !state.ai
+        }
     case PROCESS_BOARD:
       const winner = checkForWinner(state) && state.currentUser;
       return {

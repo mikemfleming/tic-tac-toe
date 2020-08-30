@@ -5,6 +5,8 @@ import reducer, {
   RESET_GRID,
   RESIZE_GRID,
   PROCESS_BOARD,
+  TOGGLE_AI,
+  AI_MOVE
 } from "../state/reducer";
 import styles from "../styles/Home.module.css";
 
@@ -23,6 +25,15 @@ export default function Home() {
 
     dispatch({ type: PROCESS_BOARD });
   };
+  const handleSlider = ({ target: { value } }) => dispatch({
+    type: RESIZE_GRID,
+    payload: { newSize: parseInt(value) },
+  });
+  const handleAIClick = () => dispatch({ type: TOGGLE_AI })
+
+  if (!state.winner && !state.draw && state.ai && state.currentUser === '0') {
+    dispatch({ type: AI_MOVE })
+  }
 
   return (
     <div className={styles.container}>
@@ -44,8 +55,7 @@ export default function Home() {
                 <div
                   className={styles.cell}
                   key={j}
-                  {...(!state.winner &&
-                    cellValue === "" && { onClick: handleCellClick(i, j) })}
+                  {...(!state.winner && cellValue === "" && (!state.ai || state.currentUser === 'X') && { onClick: handleCellClick(i, j) })}
                 >
                   <div className={cellStyleMapping[cellValue]} />
                 </div>
@@ -58,16 +68,16 @@ export default function Home() {
           <input
             type="range"
             disabled={state.movesMade > 0}
-            onChange={({ target: { value } }) =>
-              dispatch({
-                type: RESIZE_GRID,
-                payload: { newSize: parseInt(value) },
-              })
-            }
+            onChange={handleSlider}
             value={state.gridSize}
             min={state.minSize}
             max={state.maxSize}
           />
+          <div
+            {...(state.movesMade === 0 && { onClick: handleAIClick })}
+          >
+            🤖
+          </div>
           {(state.draw || state.winner) && (
             <div
               className={styles.reset}
