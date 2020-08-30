@@ -27,9 +27,25 @@
 }
 
 .cell {
+  background-color: whitesmoke;
   border: 1px solid black;
+  padding: 2px;
   display: inline-block;
   flex: 1;
+}
+
+.x, .o {
+  border-radius: 10%;
+  width: 100%;
+  height: 100%
+}
+
+.x {
+  background-color: #FF4136;
+}
+
+.o {
+  background-color: #85144b;
 }
 
 @media (max-width: 600px) {
@@ -41,6 +57,9 @@
 
 .settings {
   width: 40vw;
+  height: 2rem;
+  display: flex;
+  justify-content: space-between;
 }
 
 .reset {

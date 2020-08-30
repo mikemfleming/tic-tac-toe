@@ -3,13 +3,6 @@ import { useReducer, useEffect, useRef, useMemo } from 'react'
 
 import styles from '../styles/Home.module.css'
 
-// TODO:
-//  X handle draws
-//  X handle game end to reset
-//  X handle grid size change
-//  * add svgs for squares
-//  * add ai
-
 const initialState = {
   grid: [
     ['', '', ''],
@@ -17,7 +10,6 @@ const initialState = {
     ['', '', '']
   ],
   currentUser: 'X',
-  // remove movesMade in favor of currentUser
   movesMade: 0,
   gridSize: 3,
   winner: null,
@@ -97,14 +89,7 @@ function reducer(state, action) {
         )
       }
     case RESET_GRID:
-      return {
-        ...state,
-        movesMade: 0,
-        winner: null,
-        grid: new Array(state.gridSize).fill(
-          new Array(state.gridSize).fill('')
-        )
-      }
+      return initialState
     case USER_MOVE:
       const {
         currentUser,
@@ -141,7 +126,10 @@ function reducer(state, action) {
         }
       }
 
-      return newState
+      return {
+        ...newState,
+        currentUser: currentUser === 'X' ? '0' : 'X'
+      }
     default:
       throw new Error('Action not supported.')
   }
@@ -172,13 +160,18 @@ export default function Home() {
                   currentUser: state.movesMade % 2 === 0 ? 'X' : '0'
                 }
               })
+              const cellStyleMapping = {
+                '': '',
+                'X': styles.x,
+                '0': styles.o
+              }
 
               return (<div
                 className={styles.cell}
                 key={j}
                 {...(cellValue === '' && { onClick })}
               >
-                {cellValue}
+                <div className={cellStyleMapping[cellValue]}/>
               </div>)
             })}</div>
           ))}
