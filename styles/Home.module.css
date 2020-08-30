@@ -2,6 +2,10 @@
   margin: auto;
 }
 
+.title {
+  margin-bottom: 0;
+}
+
 .main {
   padding: 5rem 0;
   flex: 1;
@@ -63,8 +67,18 @@
 }
 
 .reset {
+  cursor: pointer;
   display: inline-block;
   border: .2rem solid black;
   padding: .2rem;
   text-transform: uppercase;
+}
+
+.scoreboard {
+  width: 40vw;
+  height: 1rem;
+  margin-bottom: .5rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
 }

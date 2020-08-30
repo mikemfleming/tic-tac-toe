@@ -12,44 +12,46 @@ const initialState = {
   currentUser: 'X',
   movesMade: 0,
   gridSize: 3,
-  winner: null,
+  winner: false,
+  draw: false,
   maxSize: 13,
   minSize: 1
 }
 
-function checkForWinner(state, [userI, userJ]) {
-  return checkUpAndDown() ||
-    checkLeftAndRight() ||
+function checkForWinner(state) {
+  return checkLeftAndRight() ||
+    checkUpAndDown() ||
     checkUpLeftAndDownRight() ||
     checkUpRightAndDownLeft()
 
-    // TODO something sucks here
   function checkUpAndDown() {
-    let winner = true;
-    
-    state.grid.forEach(row => {
-      if (row[userJ] !== state.currentUser) {
-        winner = false
+    let winner = false
+
+    for (let j = 0; j < state.gridSize && !winner; j++) {
+      const cells = []
+
+      for (let i = 0; i < state.gridSize; i++) {
+        cells.push(state.grid[i][j])
       }
-    })
-    console.log('should be a winner')
+
+      winner = cells.filter(cell => cell === state.currentUser).length === state.gridSize
+    }
+
     return winner
   }
 
-  // check left and right
   function checkLeftAndRight() {
-    let winner = true;
+    let winner = false
 
-    state.grid[userI].forEach(cell => {
-      if (cell !== state.currentUser) {
-        winner = false
+    state.grid.forEach(row => {
+      if (!winner) {
+        winner = row.filter(cell => cell === state.currentUser).length === state.gridSize
       }
     })
 
     return winner
   }
 
-  // check up/left and down/right
   function checkUpLeftAndDownRight() {
     for (let i = 0; i < state.grid[0].length; i++) {
       if (state.grid[i][i] !== state.currentUser) {
@@ -60,7 +62,6 @@ function checkForWinner(state, [userI, userJ]) {
     return true
   }
 
-  // check up/right and down/left
   function checkUpRightAndDownLeft() {
     for (let i = 0; i < state.grid[0].length; i++) {
       if (state.grid[i][state.grid.length - 1 - i] !== state.currentUser) {
@@ -75,12 +76,20 @@ function checkForWinner(state, [userI, userJ]) {
 const USER_MOVE = 'user_move'
 const RESET_GRID = 'reset_grid'
 const RESIZE_GRID = 'resize_grid'
+const PROCESS_BOARD = 'process_board'
 
 function reducer(state, action) {
   switch (action.type) {
+    case PROCESS_BOARD:
+      const winner = checkForWinner(state) && state.currentUser
+      return {
+        ...state,
+        currentUser: state.currentUser === 'X' ? '0' : 'X',
+        winner,
+        draw: !winner && state.movesMade === Math.pow(state.gridSize, 2)
+      }
     case RESIZE_GRID:
       const { newSize } = action.payload
-
       return {
         ...state,
         gridSize: newSize,
@@ -92,43 +101,18 @@ function reducer(state, action) {
       return initialState
     case USER_MOVE:
       const {
-        currentUser,
         coordinates: [userI, userJ]
       } = action.payload
 
-      const newState = {
+      return {
         ...state,
         movesMade: state.movesMade + 1,
         grid: state.grid.map((row, i) => row.map((cell, j) => {
             if (userI === i && userJ === j) {
-              return currentUser
+              return state.currentUser
             }
             return cell
         }))
-      }
-
-      const won = checkForWinner(newState, [userI, userJ])
-
-      // handle draws
-      if (newState.movesMade === newState.grid[0].length * newState.grid[0].length && !won) {
-        console.log('draw!')
-        return {
-          ...newState,
-          winner: state.currentUser
-        }
-      }
-
-      if (checkForWinner(newState, [userI, userJ])) {
-        console.log('winner!')
-        return {
-          ...newState,
-          winner: state.currentUser
-        }
-      }
-
-      return {
-        ...newState,
-        currentUser: currentUser === 'X' ? '0' : 'X'
       }
     default:
       throw new Error('Action not supported.')
@@ -137,6 +121,19 @@ function reducer(state, action) {
 
 export default function Home() {
   const [state, dispatch] = useReducerWithLogger(reducer, initialState)
+  const cellStyleMapping = {
+    '': '',
+    'X': styles.x,
+    '0': styles.o
+  }
+  const handleCellClick = (i, j) => () => {
+    dispatch({
+      type: USER_MOVE,
+      payload: { coordinates: [i, j] }
+    })
+
+    dispatch({ type: PROCESS_BOARD })
+  }
 
   return (
     <div className={styles.container}>
@@ -149,31 +146,21 @@ export default function Home() {
         <h1 className={styles.title}>
           T - T - T
         </h1>
-
+        <div className={styles.scoreboard}>
+          {state.winner && <span>{`${state.winner} wins!`}</span>}
+          {state.draw && <span>Draw 🤬</span>}
+        </div>
         <div className={styles.grid}>
           {state.grid.map((row, i) => (
-            <div className={styles.row} key={i}>{row.map((cellValue, j) => {
-              const onClick = () => dispatch({
-                type: USER_MOVE,
-                payload: {
-                  coordinates: [i, j],
-                  currentUser: state.movesMade % 2 === 0 ? 'X' : '0'
-                }
-              })
-              const cellStyleMapping = {
-                '': '',
-                'X': styles.x,
-                '0': styles.o
-              }
-
-              return (<div
+            <div className={styles.row} key={i}>{row.map((cellValue, j) => (
+              <div
                 className={styles.cell}
                 key={j}
-                {...(cellValue === '' && { onClick })}
+                {...(cellValue === '' && { onClick: handleCellClick(i, j) })}
               >
                 <div className={cellStyleMapping[cellValue]}/>
-              </div>)
-            })}</div>
+              </div>
+            ))}</div>
           ))}
         </div>
 
