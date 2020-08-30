@@ -3,6 +3,13 @@ import { useReducer, useEffect, useRef, useMemo } from 'react'
 
 import styles from '../styles/Home.module.css'
 
+// TODO:
+//  X handle draws
+//  X handle game end to reset
+//  X handle grid size change
+//  * add svgs for squares
+//  * add ai
+
 const initialState = {
   grid: [
     ['', '', ''],
@@ -12,9 +19,10 @@ const initialState = {
   currentUser: 'X',
   // remove movesMade in favor of currentUser
   movesMade: 0,
-  ai: false,
   gridSize: 3,
-  winner: null
+  winner: null,
+  maxSize: 13,
+  minSize: 1
 }
 
 function checkForWinner(state, [userI, userJ]) {
@@ -23,15 +31,16 @@ function checkForWinner(state, [userI, userJ]) {
     checkUpLeftAndDownRight() ||
     checkUpRightAndDownLeft()
 
+    // TODO something sucks here
   function checkUpAndDown() {
     let winner = true;
     
     state.grid.forEach(row => {
-      if (row[userI] !== state.currentUser) {
+      if (row[userJ] !== state.currentUser) {
         winner = false
       }
     })
-
+    console.log('should be a winner')
     return winner
   }
 
@@ -71,9 +80,32 @@ function checkForWinner(state, [userI, userJ]) {
   }
 }
 
+const USER_MOVE = 'user_move'
+const RESET_GRID = 'reset_grid'
+const RESIZE_GRID = 'resize_grid'
+
 function reducer(state, action) {
   switch (action.type) {
-    case 'move':
+    case RESIZE_GRID:
+      const { newSize } = action.payload
+
+      return {
+        ...state,
+        gridSize: newSize,
+        grid: new Array(newSize).fill(
+          new Array(newSize).fill('')
+        )
+      }
+    case RESET_GRID:
+      return {
+        ...state,
+        movesMade: 0,
+        winner: null,
+        grid: new Array(state.gridSize).fill(
+          new Array(state.gridSize).fill('')
+        )
+      }
+    case USER_MOVE:
       const {
         currentUser,
         coordinates: [userI, userJ]
@@ -90,8 +122,19 @@ function reducer(state, action) {
         }))
       }
 
+      const won = checkForWinner(newState, [userI, userJ])
+
+      // handle draws
+      if (newState.movesMade === newState.grid[0].length * newState.grid[0].length && !won) {
+        console.log('draw!')
+        return {
+          ...newState,
+          winner: state.currentUser
+        }
+      }
+
       if (checkForWinner(newState, [userI, userJ])) {
-        alert('winner!')
+        console.log('winner!')
         return {
           ...newState,
           winner: state.currentUser
@@ -100,7 +143,7 @@ function reducer(state, action) {
 
       return newState
     default:
-      throw new Error()
+      throw new Error('Action not supported.')
   }
 }
 
@@ -116,14 +159,14 @@ export default function Home() {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Tic Tac Toe
+          T - T - T
         </h1>
 
         <div className={styles.grid}>
           {state.grid.map((row, i) => (
             <div className={styles.row} key={i}>{row.map((cellValue, j) => {
               const onClick = () => dispatch({
-                type: 'move',
+                type: USER_MOVE,
                 payload: {
                   coordinates: [i, j],
                   currentUser: state.movesMade % 2 === 0 ? 'X' : '0'
@@ -139,6 +182,23 @@ export default function Home() {
               </div>)
             })}</div>
           ))}
+        </div>
+
+        <div className={styles.settings}>
+            <input
+              type="range" 
+              disabled={state.movesMade > 0}
+              onChange={({ target: { value } }) => dispatch({
+                type: RESIZE_GRID,
+                payload: { newSize: parseInt(value) }
+              })}
+              value={state.gridSize}
+              min={state.minSize}
+              max={state.maxSize}
+            />
+            {state.winner && (
+              <div className={styles.reset} onClick={() => dispatch({ type: RESET_GRID })}>Reset?</div>
+            )}
         </div>
       </main>
     </div>

@@ -12,6 +12,7 @@
 }
 
 .grid {
+  margin-bottom: .6rem;
   border: .5rem solid black;
   height: 40vw;
   width: 40vw;
@@ -36,4 +37,15 @@
     width: 100%;
     flex-direction: column;
   }
+}
+
+.settings {
+  width: 40vw;
+}
+
+.reset {
+  display: inline-block;
+  border: .2rem solid black;
+  padding: .2rem;
+  text-transform: uppercase;
 }
