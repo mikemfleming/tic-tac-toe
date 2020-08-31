@@ -67,7 +67,7 @@ export default function Home() {
             min={state.minSize}
             max={state.maxSize}
           />
-          {state.winner && (
+          {(state.draw || state.winner) && (
             <div
               className={styles.reset}
               onClick={() => dispatch({ type: RESET_GRID })}

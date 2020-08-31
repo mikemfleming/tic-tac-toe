@@ -77,8 +77,8 @@
 
 .scoreboard {
   width: 40vw;
-  height: 1rem;
-  margin-bottom: 0.5rem;
+  height: 0.8rem;
+  margin-bottom: 1rem;
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
