@@ -73,11 +73,6 @@ export default function Home() {
             min={state.minSize}
             max={state.maxSize}
           />
-          <div
-            {...(state.movesMade === 0 && { onClick: handleAIClick })}
-          >
-            🤖
-          </div>
           {(state.draw || state.winner) && (
             <div
               className={styles.reset}
@@ -86,6 +81,12 @@ export default function Home() {
               Reset?
             </div>
           )}
+          <div
+            className={[styles.ai, state.ai && styles.active,  state.movesMade === 0 && styles.pointer].join(' ')}
+            {...(state.movesMade === 0 && { onClick: handleAIClick })}
+          >
+            vs ai
+          </div>
         </div>
       </main>
     </div>

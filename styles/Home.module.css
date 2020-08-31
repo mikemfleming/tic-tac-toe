@@ -60,6 +60,22 @@
   }
 }
 
+.ai {
+  display: inline-block;
+  border: 0.2rem solid lightgray;
+  padding: 0.2rem;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.ai.active {
+  border-color: black;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
 .settings {
   width: 40vw;
   height: 2rem;
