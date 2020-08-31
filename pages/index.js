@@ -44,7 +44,7 @@ export default function Home() {
                 <div
                   className={styles.cell}
                   key={j}
-                  {...(cellValue === "" && { onClick: handleCellClick(i, j) })}
+                  {...(!state.winner && cellValue === "" && { onClick: handleCellClick(i, j) })}
                 >
                   <div className={cellStyleMapping[cellValue]} />
                 </div>
