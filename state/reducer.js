@@ -4,15 +4,16 @@ export const USER_MOVE = "user_move";
 export const RESET_GRID = "reset_grid";
 export const RESIZE_GRID = "resize_grid";
 export const PROCESS_BOARD = "process_board";
-export const TOGGLE_AI = 'toggle_ai'
-export const AI_MOVE = 'ai_move'
+export const TOGGLE_AI = "toggle_ai";
+export const AI_MOVE = "ai_move";
 
-export default () => useReducerWithLogger(reducer, initialState);
+const reducerWithMiddleware = () => useReducerWithLogger(reducer, initialState);
+export default reducerWithMiddleware;
 
 const initialState = {
   grid: [
-    ["", "", ""],
-    ["", "", ""],
+    ["X", "0", ""],
+    ["", "X", "0"],
     ["", "", ""],
   ],
   currentUser: "X",
@@ -22,52 +23,49 @@ const initialState = {
   draw: false,
   maxSize: 13,
   minSize: 1,
-  ai: false
+  ai: true,
 };
 
 function reducer(state, action) {
   switch (action.type) {
     case AI_MOVE:
-        let bestScore = -Infinity
-        let move
+      let bestScore = -Infinity;
+      let move;
 
-        for (let i = 0; i < state.gridSize; i++) {
-          for (let j = 0; j < state.gridSize; j++) {
-            const theoreticalGrid = state.grid.map(row => row.map(cell => cell))
-
-            if (theoreticalGrid[i][j] === '') {
-              let score = minimax({
-                grid: theoreticalGrid,
-                depth: 0,
-                isMaximizing: false,
-                currentUser: state.currentUser
-              })
-
-              theoreticalGrid[i][j] = state.currentUser
-
-              if (score > bestScore) {
-                bestScore = score
-                move = { i, j }
-              }
+      for (let i = 0; i < state.gridSize; i++) {
+        for (let j = 0; j < state.gridSize; j++) {
+          if (state.grid[i][j] === "") {
+            let nextScore = minimax({
+              grid: state.grid.map((row) => row.map((cell) => cell)),
+              depth: 0,
+              isMaximizing: false,
+              currentUser: state.currentUser,
+            });
+            console.log(nextScore);
+            if (nextScore > bestScore) {
+              bestScore = nextScore;
+              move = { i, j };
             }
           }
         }
+      }
 
-        return {
-            ...state,
-            currentUser: state.currentUser === "X" ? "0" : "X",
-            grid: state.grid.map((row, i) => row.map((cell, j) => {
-              if (i === move.i && j === move.j) {
-                return state.currentUser
-              }
-              return cell
-            }))
-        }
+      return {
+        ...state,
+        grid: state.grid.map((row, i) =>
+          row.map((cell, j) => {
+            if (i === move.i && j === move.j) {
+              return state.currentUser;
+            }
+            return cell;
+          })
+        ),
+      };
     case TOGGLE_AI:
-        return {
-            ...state,
-            ai: !state.ai
-        }
+      return {
+        ...state,
+        ai: !state.ai,
+      };
     case PROCESS_BOARD:
       const winner = checkForWinner(state) && state.currentUser;
       return {
@@ -108,66 +106,46 @@ function reducer(state, action) {
 }
 
 function minimax({ grid, currentUser, depth, isMaximizing }) {
-  // 🤬
-  return Math.floor(Math.random() * 3) - 1;
-  // const won = checkForWinner({
-  //   grid,
-  //   currentUser,
-  //   gridSize: grid[0].length
-  // });
+  const won = checkForWinner({
+    grid,
+    currentUser,
+    gridSize: grid[0].length,
+  });
+  if (won) {
+    return currentUser === "X" ? 10 : -10;
+  }
 
-  // if (won) {
-  //   return currentUser === 'X' ? -1 : 1
-  // }
+  // if draw
+  if (depth === Math.pow(grid[0].length, 2)) {
+    return 0;
+  }
 
-  // // if draw
-  // if (depth === Math.pow(grid[0].length, 2)) {
-  //   return 0;
-  // }
+  let bestScore = isMaximizing ? -Infinity : Infinity;
 
-  // if (isMaximizing) {
-  //   let bestScore = -Infinity;
+  grid.forEach((row, i) =>
+    row.forEach((cell, j) => {
+      // is the spot available?
+      if (cell === "") {
+        grid[i][j] = currentUser;
 
-  //   grid.forEach((row, i) => row.forEach((cell, j) => {
-  //     const nextTheoreticalGrid = grid.map(row => row.map(cell => cell))
+        const nextScore = minimax({
+          grid,
+          currentUser: currentUser === "X" ? "0" : "X",
+          depth: depth + 1,
+          isMaximizing: !isMaximizing,
+        });
 
-  //     // is the spot available?
-  //     if (cell === '') {
-  //       nextTheoreticalGrid[i][j] === 'X';
-        
-  //       const nextScore = minimax({
-  //         grid: nextTheoreticalGrid,
-  //         currentUser: currentUser === 'X' ? '0' : 'X',
-  //         depth: depth + 1,
-  //         isMaximizing: false
-  //       });
-  
-  //       bestScore = Math.max(nextScore, bestScore);
-  //     }
-  //   }))
+        grid[i][j] = "";
 
-  //   return bestScore;
-  // } else {
-  //   let bestScore = Infinity;
+        bestScore = isMaximizing
+          ? Math.max(nextScore, bestScore)
+          : Math.min(nextScore, bestScore);
+        // debugger
+      }
+    })
+  );
 
-  //   grid.forEach((row, i) => row.forEach((cell, j) => {
-  //     const nextTheoreticalGrid = grid.map(row => row.map(cell => cell))
-  //     // is the spot available?
-  //     if (cell === '') {
-  //       nextTheoreticalGrid[i][j] === 'X';
-        
-  //       const nextScore = minimax({
-  //         grid: nextTheoreticalGrid,
-  //         currentUser: currentUser === 'X' ? '0' : 'X',
-  //         depth: depth + 1,
-  //         isMaximizing: true
-  //       });
-  
-  //       bestScore = Math.min(nextScore, bestScore);
-  //     }
-  //   }))
-  //   return bestScore
-  // }
+  return bestScore;
 }
 
 function checkForWinner(state) {
